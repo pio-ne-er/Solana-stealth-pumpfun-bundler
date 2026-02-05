@@ -1,80 +1,167 @@
-# Solana Pumpfun & Bonkfun Bundler using JITO & LOOKUPTABLE
+# Pump.fun Token Launchpad Buy / Sell Bundler
+
+CLI tool for launching and managing Pump.fun tokens with bundled buys, holder distribution, and SOL/token gathering across multiple bundler wallets. The docs describe a **stealth mode** / wallet-mixer style flow and **forking real bot activity** (Axiom, Bloom, Photon, Trojan, GMGN, etc.) for bypassing Bubblemap detection; the wallet mixer, stealth mode, and real bot activity parts are **not included** in this repo for privacy.
 
 ## Contact
-Telegram: [Pio-ne-er](https://t.me/hi_3333)
 
-You can contact me here if you have any problems with this repo then we can decide comfortable contact way.
+Telegram: [Pioneer](https://t.me/hi_3333)
 
-## New Updates
+## Stealth mode & Bubblemap bypass (Axiom / GMGN)
 
-Axiom Buy + Bloom Buy is bypassing bubble detection problem successfully.
-Here is the example of successful launch.
+Trading platforms like **Axiom** and **GMGN** use Bubblemap-style analysis to detect bundled buys, insider concentration, and wallet clustering. This tool implements a **stealth / wallet-mixer** approach to make ownership look more organic:
 
-https://solscan.io/token/CaqZUfejGnHQtZqkF98iNQNXBYEuaHBEZxkRnmVAtqXK
+1. **Bundler wallets** — A small set of wallets perform the initial bundle buy (e.g. via Jito). On-chain this can look like coordinated buying.
+2. **Holder wallets** — A larger set of separate wallets is created. After the buy, tokens are **distributed** from bundlers to these holders with randomized amounts and timing (`holderTokenAmountMin` / `holderTokenAmountMax`, `holderCreateInterval`, `holderTokenTransferInterval`).
+3. **Effect** — Supply is spread across many unrelated-looking addresses. Bubblemap-style tools see many distinct holders with varied balances instead of a few heavy wallets, which can reduce flags on Axiom, GMGN, and similar dashboards.
+4. **Gather** — When needed, you can gather tokens back from holder wallets to bundlers (or sell from bundlers) using the Token Holders and Gather menus.
 
-Bundle ID: 
-https://explorer.jito.wtf/bundle/b7c31cdb366875fa66aead1933843ae4ee48ce7eb7713304bd454e8e0a0786c2
-https://solscan.io/tx/LoQdPyTz2skmwNY1ouVZ4HoPWhU7G1pCw76mZHWzYGEWn3MZnFPn7ZQtWzsskLf99yeKCYLnhEH71KXX1eeWwLo
-https://solscan.io/tx/5N99cCok6td3Tcp3MV7ajUJLq7DsXxWKEceQ4YcCXtobHwZmJnvyKHbs9mDTDosUcH6CywN4LHd2oEntxwymhrTz
+**Forking real bot activity** — For each bundler wallet, buys are designed to **fork** (mimic) the on-chain behavior of real trading bots used by **Axiom**, **Bloom**, **Photon**, **Trojan**, **GMGN**, and similar platforms. So each bundler’s activity can look like normal bot flow from those services rather than coordinated bundling, which helps with detection bypass on their dashboards and Bubblemap-style analysis.
 
-<img width="567" height="616" alt="image" src="https://github.com/user-attachments/assets/1453624a-750e-45a9-a09b-11b6d4cad6eb" />
+Use **Token Launch** → create & bundle buy, then **Token Holders** → distribute to holder wallets to engage this stealth flow. Tune `distNum`, `remaining_token_percent`, and holder amount ranges in `settings.ts` to shape the distribution.
 
-## Sample
+> **Note:** This repository **does not include** the wallet mixer, stealth mode, or real bot activity implementation in the codebase. Those parts are omitted for **privacy**; the repo provides the bundler, token launch, holder distribution, and gather flows. You can implement or plug in your own mixer/stealth and bot-activity logic as needed.
 
-https://pump.fun/7JTQG7Bp6fsbnSmfT6NqRoTmoMj6aX9NZXdnsnHgJtuz
+## Sample token launch & Bubblemap testing
 
-with updated version
+A test token was launched with this bundler (create & bundle buy, then distribute to holder wallets) to verify the flow and how it appears on Bubblemap-style analysis.
 
-https://solscan.io/token/4KndEPnfUbBWMqt98MASDdRL7DNLzyRG2E5epTps3Hz5
-https://pump.fun/4KndEPnfUbBWMqt98MASDdRL7DNLzyRG2E5epTps3Hz5
+**Sample token (testing):**
 
-https://solscan.io/tx/qEkqUEhmxd13AKNVKQqNNYD6m7HybY1qS5vcUCdypKvqaVSGqhhpLMGhae3ca86TdA4UHTGvrzyifJQm3LgxwJh
-https://solscan.io/tx/5GKq7hTTF9UKfeUNLE5WS34mo27NBewX74oxfni83KgWgtq9KQskcpEFCUiZbDLn4BkhXZ5CLh5pWH6CHX9EMwEH
-https://solscan.io/tx/W33LBg34YvnKjt4db6thosLwLWHUHEqxSraXsVXCw8nqH8CPKNVKyNF6ykAnwqPLVArvWaP2aZnfN8NHhUKLZGh
-https://solscan.io/tx/3w9jxKvFMYZmUXNAC9ee3QgsmvKAiBrm4zKNp6wJb32Mn4d2H9g1jdobeGfQxyPczfUcU6398msosKziSdhzBjeY
+| | |
+|--|--|
+| **Mint** | `EMRHBgbj9SgjPvcE8EA4EfVvDq8YrS7giahZgTsFpump` |
+| **Pump.fun** | [pump.fun/coin/Gcvt4wcirTfC6wQGCEi42UUsUS1H3rNkHgqtw5oEpump](https://pump.fun/coin/Gcvt4wcirTfC6wQGCEi42UUsUS1H3rNkHgqtw5oEpump) |
+| **Solscan** | [solscan.io token](https://solscan.io/token/Gcvt4wcirTfC6wQGCEi42UUsUS1H3rNkHgqtw5oEpump) |
 
-Each transaction is buying tokens from 5 wallets, totally buying with 24 wallets.
-You can check successful buying transactions.
-Now, again Updated with the random amounts to buy from 24 wallets and seperating dev and funding wallets to pass the security checks.
+**Bubblemap (post–holder distribution):**
 
-## Overview
+After distribution to bundler wallets, Bubblemap shows many distinct holders and varied balances instead of a few concentrated wallets, illustrating the bypass effect.
 
-Jito is supporting the bundle service that you can confirm 4 transactions (This is maximum from my experience) at once.
+![Bubblemap sample — testing token](docs/bubblemap.png)
 
-I am doing with 24 wallets, but there is possibility to increase the number of wallets.
-So, each swap instruction of Pumpfun has less accounts than Raydium, so we can use Lookuptable more effectively than Raydium.
+## Features
 
-It provides methods for creating, buying from 24 wallets, and selling tokens when you want.
+- **Stealth mode / wallet mixer** — Distribute tokens to many holder wallets to reduce Bubblemap-style detection on Axiom, GMGN, and similar platforms (see section above)
+- **Fork real bot activity** — (Docs only; code not in repo for privacy.) Each bundler wallet’s buys can mimic real bot behavior of Axiom, Bloom, Photon, Trojan, GMGN, etc.
+- **Token launch** — Create token & pool, then bundle-buy across multiple wallets in one flow
+- **Presimulate** — Run simulation before launching to validate setup
+- **Token sell & buy** — Manual sell from each bundler
+- **Token holders** — Distribute tokens to holder wallets; gather selected or all tokens back to bundlers
+- **Gather** — Collect SOL from all or one bundler; distribute SOL to bundler wallets
+- **Balances** — View SOL and token balances for all bundler wallets
 
-This is the steps of My bundler.
+## Requirements
 
-## 1. Creating wallets to buy tokens from the pool you creating.
+- Node.js (v18+)
+- Solana RPC (and optional WebSocket)
+- Jito block engine URL (for bundle execution)
+- Wallets: LP wallet (liquidity/token creation), bundler provider wallet (batch buys)
 
-## 2. Creating Lookuptable
+## Setup
 
-## 3. Extending Lookuptable and simulations of each transactions to bundle
+### 1. Install dependencies
 
-## 4. Bundle createPool with the token of metadata transaction and 3 transactions buying from 28 wallets.
+```bash
+npm install
+# or
+yarn install
+```
 
-## 5. Sell tokens at once from 24 wallets using bundle when you want
+### 2. Environment variables
 
-## 6. Gathering Sol from 24 wallets you bundle buy and sell
+Create a `.env` file in the project root with:
 
-# Updated Version
+| Variable | Description |
+|----------|-------------|
+| `RPC_ENDPOINT` | Solana RPC HTTP URL |
+| `RPC_WEBSOCKET_ENDPOINT` | Solana WebSocket URL |
+| `BLOCKENGINE_URL` | Jito block engine URL |
+| `LILJITO_RPC_ENDPOINT` | Lil Jito RPC endpoint |
+| `COMPUTE_UNIT_PRICE` | Compute unit price for transactions |
+| `JITO_FEE` | Jito tip amount (in SOL) |
+| `PRIORITY_FEE` | Set in `settings.ts` (optional override) |
 
-Previous version has serious problem.
-But nobody recorgnized it but after delivery of the product, when the clients are testing with big amount of solana, it meets error (exactly SLIPPAGE error)
-So, in updated version, I solved that problem.
-And seperate the dev wallet and funding wallet.
-And randomize the amount of distributing to bundler wallets, by doing that we can decorate the chart well.
+### 3. Settings
 
-#BonkFun Bundler
+Copy `settings.example.ts` to `settings.ts` and fill in:
 
-https://explorer.jito.wtf/bundle/eaa8763d37102137000aab9ee7986e822e378a31a3d84c1d4c980e6b96074f21
+- **Token metadata** — `token` (mint, name, symbol, description, socials, image path)
+- **LP wallet** — `LP_wallet_private_key` / `LP_wallet_keypair` (for creating token/pool)
+- **Bundler provider** — `Bundler_provider_private_key` / `Bundler_provider_wallet_keypair` (for bundle buys)
+- **Bundling** — `batchSize`, `bundleWalletNum`, `bundlerHoldingPercent`
+- **Intervals** — `walletCreateInterval`, `walletTransferInterval`, `holderTokenTransferInterval`, `holderCreateInterval`
+- **Holders** — `holderTokenAmountMin` / `holderTokenAmountMax`, `distNum`, `remaining_token_percent`
+- **Wallet files** — `bundlerWalletName`, `holderWalletName` (e.g. `"bundlers"` → `wallets/bundlers.json`)
+- **Fees & rent** — `PRIORITY_FEE`, `extra_sol_amount`
 
-This bundle transaction which is successfullly bundle the pool creation and buy transactions.
+Ensure `wallets/` exists and any referenced JSON files (e.g. `bundlers.json`, `mint.json`) are present as needed.
 
-pool creation: https://solscan.io/tx/3WcHBgxMyZrXjf4fHCFUKgp1A4oK2C8ikUkhXt6fmBmxFoZffi6eDySaBi2xBmCYqWvnSeRCPvnrHpijqSkAFzUD
-buy transaction: https://solscan.io/tx/5J5KNjqG1VHFEinoyZHptPitfy1tDZGs2aKoCfYGvgTF9wfZEpQ9zWZQr7dKRv2UpbxGLXjZH8vDUCEH2AF81Xyn
+## Usage
 
-Please feel free to contact me for any help.
+Start the interactive CLI:
+
+```bash
+npm start
+# or
+yarn start
+# or
+npx ts-node index.ts
+```
+
+### Main menu
+
+| Option | Action |
+|--------|--------|
+| 1 | **Token Launch** — Presimulate, then create token & pool and run bundle buy |
+| 2 | **Token Sell & Buy** — Sell from each bundler (manual each sell) |
+| 3 | **Gather** — Gather SOL from bundlers or distribute SOL to them |
+| 4 | **Balances** — Show bundler SOL and token balances |
+| 5 | Exit |
+
+### Token Launch submenu
+
+- **Presimulate** — Simulate before creating token and buying
+- **Create Token & Pool and BundleBuy** — Full launch + bundled buy
+- Back / Exit
+
+### Token Holders (from layout)
+
+- Distribute token to holder wallets
+- Gather selected token to bundler wallets
+- Gather all token to bundler wallets
+
+### Gather submenu
+
+- Gather SOL from all bundler wallets
+- Gather SOL from one bundler wallet
+- Distribute SOL to bundler wallets
+
+## Scripts
+
+| Script | Command | Description |
+|--------|---------|-------------|
+| Start / dev | `npm start` / `npm run dev` | Run main CLI (`index.ts`) |
+| Close LUT | `npm run close` | Run `closeLut.ts` |
+| Gather | `npm run gather` | Run `gather.ts` |
+
+## Project structure
+
+```
+├── index.ts              # Entry point & main menu
+├── config.ts             # RPC, Jito, env config
+├── closeLut.ts           # LUT close utility
+├── layout/               # Token launch, holders, gather, balances
+├── menu/                 # CLI menus & readline
+├── src/                  # Pump.fun SDK, logging, utils, types
+│   ├── pumpfun/          # Pump.fun IDL & bonding curve logic
+│   └── ...
+├── executor/             # Jito, legacy, lilJito executors
+├── constants/            # Pump.fun constants
+├── utils/                # Logger & helpers
+├── wallets/              # bundlers.json, mint.json, etc.
+└── settings.example.ts   # Copy to settings.ts
+```
+
+## License
+
+ISC
